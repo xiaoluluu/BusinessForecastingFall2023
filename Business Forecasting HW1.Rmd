@@ -1,0 +1,148 @@
+---
+title: 'MyHomework #1'
+output:
+  html_document: default
+  pdf_document: default
+date: "2023-09-18"
+---
+
+```{r}
+# 1. Header Name
+
+library(readxl)
+#Typical_Employee_Survey_Data <- read_excel("Typical_Employee_Survey_Data.xlsx", 
+# +     col_names = FALSE)
+df = data.frame(Typical_Employee_Survey_Data)
+
+print(df)
+
+colnames(df) = c("Age", "Gender", "Satisfaction", "Characteristic", "Years_Worked", "Promotion", "Decision_Making",
+                 "Budget_Disc", "Org_Pride", "Org_Loyalty", "Work_Relation")
+df
+
+# 2. Box Plot (5 point summary)
+
+boxplot(df$Age)
+fivenum(df$Age)
+boxplot.stats(df$Age)
+
+boxplot(df$Gender)
+fivenum(df$Gender)
+boxplot.stats(df$Gender)
+
+boxplot(df$Satisfaction)
+fivenum(df$Satisfaction)
+boxplot.stats(df$Satisfaction)
+
+boxplot(df$Characteristic)
+fivenum(df$Characteristic)
+boxplot.stats(df$Characteristic)
+
+boxplot(df$Years_Worked)
+fivenum(df$Years_Worked)
+boxplot.stats(df$Years_Worked)
+
+boxplot(df$Promotion)
+fivenum(df$Promotion)
+boxplot.stats(df$Promotion)
+
+boxplot(df$Decision_Making)
+fivenum(df$Decision_Making)
+boxplot.stats(df$Decision_Making)
+
+boxplot(df$Budget_Disc)
+fivenum(df$Budget_Disc)
+boxplot.stats(df$Budget_Disc)
+
+boxplot(df$Org_Pride)
+fivenum(df$Org_Pride)
+boxplot.stats(df$Org_Pride)
+
+boxplot(df$Org_Loyalty)
+fivenum(df$Org_Loyalty)
+boxplot.stats(df$Org_Loyalty)
+
+boxplot(df$Work_Relation)
+fivenum(df$Work_Relation)
+boxplot.stats(df$Work_Relation)
+
+# 3. Factors
+# Converted all columns except for Age and Years worked into factors as they are all categories being gender or
+# numbers correlating to a survey result
+
+df$Gender = as.factor(df$Gender)
+
+df$Satisfaction = as.factor(df$Satisfaction)
+
+df$Characteristic = as.factor(df$Characteristic)
+
+df$Promotion = as.factor(df$Promotion)
+
+df$Decision_Making = as.factor(df$Decision_Making)
+
+df$Budget_Disc = as.factor(df$Budget_Disc)
+
+df$Org_Pride = as.factor(df$Org_Pride)
+
+df$Org_Loyalty = as.factor(df$Org_Loyalty)
+
+df$Work_Relation = as.factor(df$Work_Relation)
+
+# 4. Plot the right visuals for each column
+
+stem(df$Age)
+
+#Need to install lessR package
+library(lessR)
+Gender_Var = factor(c(rep("Male", 1),
+                      rep("Female",2)))
+Gender = df$Gender
+PieChart(Gender_Var, data=Gender, hole=0, labels_cex=0.6)
+
+countSatisfaction = table(df$Satisfaction)
+barplot(countSatisfaction,main = "Satisfaction", names.arg=c("Very Satisfied", "Moderately Satisfied", "A little Dissatisfied", "Very Dissatisfied"))
+
+countCharacteristic = table(df$Characteristic)
+barplot(countCharacteristic,main = "Characteristics", col="blue", names.arg=c("High Income", "No Danger of Being Fired", "Flexible Hours", "Opportunities for Advancement", "Enjoying the Work"))
+
+plot(df$Years_Worked, xlab="Number of Entries", ylab="Years Worked")
+
+countPromoted = table(df$Promotion)
+barplot(countPromoted,main = "Promotion", col="Red", names.arg=c("Very Likely", "Likely", "Not Sure", "Unlikely", "Very Unlikely"))
+
+countDecisions = table(df$Decision_Making)
+barplot(countDecisions,main = "Decision Making", col="Green", names.arg=c("Always", "Much of the Time", "Sometimes", "Never"))
+
+#Need to install lessR package
+library(lessR)
+Budget_Var = factor(c(rep("yes", 1),
+                          rep("No",2)))
+Budget = df$Budget_Disc
+PieChart(Budget_Var, data=Budget, hole=0, labels_cex=0.6)
+
+countPride = table(df$Org_Pride)
+barplot(countPride,main = "Organization Pride", col="purple", names.arg=c("Very Proud", "Somewhat Proud", "Indifferent", "Not At All Proud"))
+
+countLoyalty = table(df$Org_Loyalty)
+barplot(countLoyalty,main = "Loyalty to Job", col="pink", names.arg=c("Very Likely", "Likely", "Not Sure", "Unlikely", "Very Unlikely"))
+
+countRelation = table(df$Work_Relation)
+barplot(countRelation,main = "Work Relationships", col="orange", names.arg=c("Very Good", "Good", "So So", "Bad"))
+
+# 5. Plot a few scatter plots to show relationship
+
+#plotted age with chance of promotion to see if there is a relationship between younger employees or older employees getting promoted
+
+plot(x = df$Age, y = df$Promotion, xlab = "Age", ylab = "Promotion", main ="Age vs Promotion")
+
+#plotted age with job characteristics to see if there is a relationship between different generations and what they value in a job i.e. does the younger generation value working from home more so than the older demographic?
+
+plot(x = df$Age, y = df$Characteristic, xlab = "Age", ylab = "Characteristics", main ="Age vs Characteristics of Job")
+
+#plotted number of years worked with organization loyalty to see if employees who have worked with the company longer have more loyalty
+
+plot(x = df$Years_Worked, y = df$Org_Loyalty, xlab = "Years Worked", ylab = "Organization Loyalty", main ="Years Worked vs Organization Loyalty")
+
+
+```
+
