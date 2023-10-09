@@ -1,0 +1,87 @@
+---
+title: 'ABI Homework #2'
+output: html_document
+date: "2023-10-08"
+---
+
+
+```{r}
+library(readxl)
+Loreal <- read_excel("/Users/rebeccaxu/Desktop/Business Forecasting/Loreal Data.xlsx")
+View(Loreal)
+
+library(fpp)
+library(fpp2)
+library(TTR)
+
+Loreal_df = data.frame(Loreal)
+print(Loreal_df)
+
+#Taking Mean
+mean_forecast <- meanf(Loreal$Amount,2)
+plot(mean_forecast)
+lines(Loreal$Amount,col="red")
+attributes(mean_forecast)
+accuracy(mean_forecast)
+#The mean forecast method stipulates that all future values are going to be equal to the average of the historical data set, so it is using the mean values to forecast the future value. For my data set, this was not the best method as L'Oreal did substantially better in the years post 2021. Financially, we took a hit during the pandemic which causes the low outlier, but there were also acquisitions of brands in the future years that did well for us so the prediction that this model gives is too low compared to how we are trending upwards.
+
+# Naive
+naive_forecast <- naive(Loreal$Amount,2)
+plot(naive_forecast)
+lines(Loreal$Amount,col="red")
+attributes(naive_forecast)
+accuracy(naive_forecast)
+#The naive model is simply taking the previous historical point and using it as the future period's actuals. The naive model performs decently well because from observing the data alone, the Quarters all build off slightly from each other, i.e previous year's Q4 is very close to the new year's Q1, Q2 is a slight drop from Q2, Q3 is a slight increase from Q2, and Q4 is another increase from Q4, so the naive model actually works quite well here.
+
+# Random Walk
+rwf_forecast <- rwf(Loreal$Amount,2)
+rwf_forecast <- rwf(Loreal$Amount,2, drift=TRUE)
+attributes(rwf_forecast)
+rwf_forecast$mse
+accuracy(rwf_forecast)
+#This is a simple time series model which is making the assumption that each future period, the variable is taking a random step away from the previous period. The steps are assumed to be independent and identically distributed size wise.
+
+# Seasonal Naive
+snaive_forecast <- snaive(Loreal$Amount,2)
+accuracy(snaive_forecast)
+#Seasonal Naive is best for datasets with highly seasonal data, in this case, we use data observed previously from the same season and use it as the forecast. For my data, there does seem to be some seasonality, as Q3 through Q4 start to trend higher, and Q1 of the following year follows that. It does also look like each year, L'Oreal's fiscal year has a stronger performance. This naive model works decently well with the same explanation as the original Naive model.
+
+# Moving Averages
+MA2_forecast <- ma(Loreal$Amount,order=2)
+MA4_forecast <- ma(Loreal$Amount,order=4)
+#Moving average allows for us to get the overall idea of trends within a dataset, as it takes the average of a subset of numbers that you define. In this case, I chose periods 2 and 4, as 4 covers the entire fiscal year and 2 because each quarter seems to be more aligned with each other and not have quite as large of a jump.
+
+# Decomposition
+Amount.ts = ts(Loreal$Amount, frequency=7, start=c(2017,1))
+ets_forecast <- ets(Amount.ts)
+plot(ets_forecast)
+#Decomposition model makes the assumption that sales are not affected by general data trend, economic cycles, seasonality, and irregular or random occurrences. The forecast is through considering each of these components separately before being combined together. In this case, this model forecasts my data set really well and provides the lowest MAE value. I believe there are more trends in my data as well, which helps with this model since one of the four factors it considers are general data trends as well as seasonality.
+
+etsf.ts = ts(ets_forecast)
+accuracy(etsf.ts)
+
+# Holt Winters Method
+HW_forecast <- HoltWinters(Amount.ts)
+plot(HW_forecast)
+SSE_Simple <- HoltWinters(Amount.ts,beta=FALSE,gamma=FALSE)
+attributes(SSE_Simple)
+plot(SSE_Simple)
+SSE_Simple$SSE
+head(SSE_Simple$fitted)
+HW.ts=ts(HW_forecast)
+accuracy(HW.ts)
+#Holt Winter's method is also a time series forecasting technique which uses exponential smoothing to make predictions based off of past observations. In this case as well, looking at the graph, this forecasting method does not follow the historical data that well, making a less accurate prediction of future values. My data set not have very strong seasonality, so I think that is throwing off the HW method. I know it is more accurate for models with a stronger seasonality.
+```
+
+```{r}
+# plot all in a single chart
+plot(mean_forecast)
+lines(naive_forecast$mean,col="red")
+lines(rwf_forecast$mean,col="green")
+lines(snaive_forecast$mean,col="black")
+lines(MA2_forecast,col="Pink")
+lines(MA4_forecast,col="Blue")
+
+#For my methods, I chose to look at MAE values to compare accuracy. The lowest MAE values were for the Decomposition model, with the two Naive models being second most accurate. The two models that performed the worst were Holt Winters and Mean Forecasting
+```
+
