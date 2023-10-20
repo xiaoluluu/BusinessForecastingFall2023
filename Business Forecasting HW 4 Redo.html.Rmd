@@ -1,0 +1,93 @@
+---
+title: 'Business Forecasting Homework #4 Re-Do'
+output: html_document
+date: "2023-10-08"
+---
+
+
+```{r}
+library(readxl)
+Loreal <- read_excel("/Users/rebeccaxu/Desktop/Business Forecasting/Loreal Data.xlsx")
+View(Loreal)
+
+library(fpp)
+library(fpp2)
+library(TTR)
+
+attributes(Loreal$Amount)
+plot(Loreal$Amount)
+Acf(Loreal$Amount)
+
+#My data has an overall seasonality trend where Quarter 3 and 4 perform the strongest, which makes sense since that is when our holiday seasons take place and people are buying presents. Q1 of the following year carries over this increase before the data starts to decrease into Q2 (which again, makes sense, as there aren't any spending incentives).
+
+#Looking at the ACF plot, it seems that there is a significant relationship in the beginning of the data whereas there is less significant of a relationship and (from my understanding) a weaker seasonality as the dataset moves into the more recent years. Taking a look at the plot from earlier, it does make sense as L'Oreal rapidly increased their business and financial earnings in the recent years. While the trend of Quarters 3 and 4 being stronger overall remains, the overall profit increase was substantial.
+
+#Taking Mean
+mean_forecast <- meanf(Loreal$Amount,2)
+plot(mean_forecast)
+attributes(mean_forecast)
+accuracy(mean_forecast)
+#The mean forecast method stipulates that all future values are going to be equal to the average of the historical data set, so it is using the mean values to forecast the future value. For my data set, this was not the best method as L'Oreal did substantially better in the years post 2021. Financially, we took a hit during the pandemic which causes the low outlier, but there were also acquisitions of brands in the future years that did well for us so the prediction that this model gives is too low compared to how we are trending upwards.
+
+# Naive
+naive_forecast <- naive(Loreal$Amount,2)
+plot(naive_forecast)
+attributes(naive_forecast)
+accuracy(naive_forecast)
+#The naive model is simply taking the previous historical point and using it as the future period's actuals. The naive model performs decently well because from observing the data alone, the Quarters all build off slightly from each other, i.e previous year's Q4 is very close to the new year's Q1, Q2 is a slight drop from Q2, Q3 is a slight increase from Q2, and Q4 is another increase from Q4, so the naive model actually works quite well here.
+
+# Random Walk
+rwf_forecast <- rwf(Loreal$Amount,2)
+rwf_forecast <- rwf(Loreal$Amount,2, drift=TRUE)
+attributes(rwf_forecast)
+rwf_forecast$mse
+accuracy(rwf_forecast)
+#This is a simple time series model which is making the assumption that each future period, the variable is taking a random step away from the previous period. The steps are assumed to be independent and identically distributed size wise.
+
+# Seasonal Naive
+snaive_forecast <- snaive(Loreal$Amount,2)
+plot(snaive_forecast)
+attributes(snaive_forecast)
+accuracy(snaive_forecast)
+#Seasonal Naive is best for datasets with highly seasonal data, in this case, we use data observed previously from the same season and use it as the forecast. For my data, there does seem to be some seasonality, as Q3 through Q4 start to trend higher, and Q1 of the following year follows that. It does also look like each year, L'Oreal's fiscal year has a stronger performance. This naive model works decently well with the same explanation as the original Naive model.
+
+# Moving Averages
+MA3_forecast <- ma(Loreal$Amount,order=3)
+MA5_forecast <- ma(Loreal$Amount,order=5)
+#Moving average allows for us to get the overall idea of trends within a dataset, as it takes the average of a subset of numbers that you define. In this case, I chose periods 3 and 5. I chose 5 to get a smoother plot to see what the overall trend was. I then chose period 3 to look into more detail the data trends.
+
+#I just want to note that for some reason, my accuracy measure still does not work for MA Forecast even with the odd numbers. I did manually calculate the MAE and for MA(3), the MAE is 336.14 and for MA(5), the MAE is 509.412
+
+# Decomposition
+ets_forecast = ets(Loreal$Amount)
+plot(ets_forecast)
+accuracy(ets_forecast)
+
+#Decomposition model makes the assumption that sales are not affected by general data trend, economic cycles, seasonality, and irregular or random occurrences. The forecast is through considering each of these components separately before being combined together. In this case, this model forecasts my data set really well and provides the lowest MAE value. I believe there are more trends in my data as well, which helps with this model since one of the four factors it considers are general data trends as well as seasonality.
+
+# Holt Winters Method
+Amount.ts = ts(Loreal$Amount, frequency=7, start=c(2017,1))
+HW_forecast <- HoltWinters(Amount.ts)
+plot(HW_forecast)
+SSE_Simple <- HoltWinters(Amount.ts,beta=FALSE,gamma=FALSE)
+attributes(SSE_Simple)
+plot(SSE_Simple)
+SSE_Simple$SSE
+head(SSE_Simple$fitted)
+HW.ts=ts(HW_forecast)
+accuracy(HW.ts)
+#Holt Winter's method is also a time series forecasting technique which uses exponential smoothing to make predictions based off of past observations. In this case as well, looking at the graph, this forecasting method does not follow the historical data that well, making a less accurate prediction of future values. My data set does not have very strong seasonality, so I think that is throwing off the HW method. I know it is more accurate for models with a stronger seasonality. 
+```
+
+```{r}
+# plot all in a single chart
+plot(mean_forecast)
+lines(naive_forecast$mean,col="red")
+lines(rwf_forecast$mean,col="green")
+lines(snaive_forecast$mean,col="black")
+lines(MA3_forecast,col="Pink")
+lines(MA5_forecast,col="Blue")
+
+#For my methods, I chose to look at MAE values to compare accuracy. The lowest MAE values were for the Naive Models as well as MA(3). The two models that performed the worst were Holt Winters and Mean Forecasting
+```
+
