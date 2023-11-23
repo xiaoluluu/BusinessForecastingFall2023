@@ -1,0 +1,61 @@
+---
+title: "Business Forecasting HW 6"
+output: html_document
+date: "2023-11-22"
+---
+
+```{r}
+library(fpp)
+library(fpp2)
+library(forecast)
+
+library(readxl)
+Loreal <- read_excel("/Users/rebeccaxu/Desktop/Business Forecasting/Loreal Data.xlsx")
+View(Loreal)
+
+plot(Loreal$Amount)
+Acf(Loreal$Amount)
+#Based on this Acf chart, it looks like the the data is positively autocorrelated at lags 1 and 2. However, the autocorrelation declines rapidly at the higher lags meaning the data is less correlated as lag increases. It also looks like the data is non stationary
+
+Amount.ts = ts(Loreal$Amount, frequency=7, start=c(2017,1))
+decompose(Amount.ts)
+
+plot(decompose(Amount.ts))
+#It looks like the trend component shows a slightly upwward trend and is generally increasing over time. The seasonal component is regular with repeating variations in the time series. The remainder component shows the variation in the timem series that isn't explained by the trend and seasonal components.
+
+ndiffs(Amount.ts)
+#here, ndiffs tells us that it will only take 1 iteration to make the given time series stationary
+nsdiffs(Amount.ts)
+#Here, nsdiffs means the number of seasonal differences, and is the number of times a ts needs to be differenced to remove seasonal patterns and make it seasonally stationary. In this case, I did not need any iterations
+
+tsdisplay(diff(Amount.ts,4))
+tsdisplay(diff(diff(Amount.ts,4)))
+#In this case, this is visualizing both of the stationary time series data, the second line is taking it with another additional lag 1 difference. In this case, the data appears to be stationary through the plot after taking the additional lag 1.The PACF graph does seem to show a lag at period 4
+
+auto.arima(Amount.ts, trace=TRUE)
+#auto.arima has tried multiple different outputs for you instead of us manually doing it, and it has found that the best Arima model is (0,1,0)
+
+auto.arima(Amount.ts)
+#This is showing us the arima model at (0,1,0), which gives a sigma^2 of 340205. The sigma value represents the residual variance or variance of the error term. Because this value is higher, this means that there is more unexplained error within the model
+
+fit <- Arima(Amount.ts, order=c(0,1,0), seasonal=c(0,1,0))
+fit
+tsdisplay(residuals(fit))
+
+res <- residuals(fit)
+tsdisplay(res)
+
+forecast = (forecast(fit, h=5))
+plot(forecast)
+auto.arima(Amount.ts, stepwise=FALSE, approximation=FALSE)
+hist(res)
+
+plot(Amount.ts)
+lines(forecast$fitted, col="Red")
+
+accuracy(forecast)
+#the MAE is 439.3529
+
+
+```
+
